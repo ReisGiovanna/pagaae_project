@@ -1,0 +1,22 @@
+{
+  "name": "PagaAê",
+  "short_name": "PagaAê",
+  "description": "Gerenciador simples de contas mensais",
+  "start_url": "/frontend/index.html",
+  "display": "standalone",
+  "background_color": "#222222",
+  "theme_color": "#333333",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/frontend/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/frontend/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

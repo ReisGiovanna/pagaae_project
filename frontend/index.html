@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PagaAê</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/frontend/manifest.json" />
+  <meta name="theme-color" content="#333" />
+
+  <!-- Ícone -->
+  <link rel="icon" href="/frontend/img/icon.png" />
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="/frontend/style.css" />
+
+  <!-- Ícones -->
+  <script src="https://kit.fontawesome.com/a2e0e9f860.js" crossorigin="anonymous"></script>
+
+  <!-- Script -->
+  <script defer src="/frontend/script.js"></script>
+</head>
+
+<body id="container">
+  <header>
+    <h1>PagaAê</h1>
+  </header>
+
+  <main>
+    <div class="containerConta">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Vencimento</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Categoria</th>
+            <th>Alerta</th>
+          </tr>
+        </thead>
+        <tbody id="listaContas"></tbody>
+      </table>
+    </div>
+
+    <div class="containerBtn">
+      <button id="btnPagar" disabled>Pagar</button>
+      <button id="btnEditar" disabled>Editar</button>
+      <button id="btnExcluir" disabled>Excluir</button>
+    </div>
+  </main>
+
+  <section>
+    <div class="containerBtn">
+      <button id="btnAdicionar">Adicionar</button>
+      <button id="btnFecharMes">Fechar Mês</button>
+      <button id="btnHistorico">Histórico</button>
+    </div>
+  </section>
+
+  <footer>© 2025 — PagaAê</footer>
+
+  <!-- Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modalTitulo">Conta</h2>
+
+      <label>Nome</label>
+      <input id="inputNome" type="text" />
+
+      <label>Vencimento</label>
+      <input id="inputVenc" type="date" />
+
+      <label>Valor</label>
+      <input id="inputValor" type="number" step="0.01" />
+
+      <label>Status</label>
+      <select id="inputStatus">
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+      </select>
+
+      <label>Categoria</label>
+      <select id="inputCategoria">
+        <option>Casa</option>
+        <option>Internet</option>
+        <option>Mercado</option>
+        <option>Saúde</option>
+        <option>Outros</option>
+      </select>
+
+      <div class="modal-buttons">
+        <button id="salvarConta">Salvar</button>
+        <button id="cancelarModal" class="btnCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
