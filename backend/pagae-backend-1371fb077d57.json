@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "pagae-backend",
+  "private_key_id": "1371fb077d5788f0f8f8884ad795bc196adc3eb7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzvqj4/DHG86jd\n+1UWUUEYVSdm0+VYqhCqxyjEak7tklLV8xaJT2HrZdA89eBfjI8DLb107tlLgiGt\nfZ8RqAAkfc/gWUX+q+IjfbeGpEw1xa0SC5SuPwEa0VdhFyGDG3XZW7dyPnMqNMBg\nxWM+9R3wR1gg0lhJRpNDZUD7WPikMy5twbBChh7Vx9tfZLvq1MBt6D8CGlQissNs\n7v5OFJv1DNfM7D8alRCdE7MCXGS5Ma51NDPoCp0GkyeFVxQ7j831UICDevbVECUd\n/lwlR2deHC2V3GQg4Uxl9fFPnSD400EEDpVRCHP2bgwuzDPqgKg5WUB2znffVcCi\nmNul4pBPAgMBAAECggEAAtjfI+hp7GKHrdJfq+0kucVQYP1wlaKJeDUoPq8vkHQ7\no6yULVWudsKfk7KSMqcoYPt1Vx+SRjZyHX0yO9gZ1fNnYyJedQu79UfATbpQThgP\n7EgzGamXFuPDsbmYfoKG8ybhZkaApi/Dg+1SZOtuUSGCtBGMsKubn9/8nTSFDkWb\nQQlGmy9GwwzYMIQxT8QKOI3yqD/7voPNHQALJteJ+LuBrJB21R/EEL38Q+QC3SwX\nLmdCHgCXM8QqpjLcm1/lpjxeqmRCvlPOnKQS/omcb1CIQz83G+3MiiVwCbr8ygfH\nRx40/BB08daHf9poIl9SJm31bPuIuPQk5rR7Z3PDIQKBgQD2hdGeGjnoY/1Gdig2\nEA3GAeHZao81A1BJgg5iTKNX4433pqalONWvcx24vjwGyFs9/VrQ908BCN+ELIu4\nc4GkRnbeBYvC1ZSM16D84FXONDL3fWYFy7zDg4Ak8y56/EElLgdVaRvIys/YZmvx\nA7xoJWddvs1Hip9QLWrPZzbMIwKBgQC6p6NtNYoVlCc7fKMFvC07Hnjb/ZU/KXb4\nmol0xaVlpK15Y65PP+f/EoIPMWuW6avibskCHehFnizj6zCG1vyfRFa9HncZm/P3\nEVGSv9Yg2krQjK0hYtUXQMWgVVox6PZL3w8dmaR2sCJ3kbSGWz7nY2bw5LpECu7v\nKHg8SKMH5QKBgFHBE0EhZW7iKg6CBNfY/xhZa3LU2eU00h1umiKTU+BDwMMOa1mD\nvanPvV2VCQceztOB/+oo+fRX4vhMZZGoDKhUDfuXT0Av4HHM2MDEDPCzcuuMlJb7\neABGzepzE0kJ+vi/iQMUNniiecdEQCvPl13aeasnKaC+IhNO3IsnqY6NAoGBALqm\n6MZMw8jQXmseN+eERbbYwgM7kgOXc2EnKE2dV8hM5Sx+gdC+F0D7QRPwV6aSBVBp\neJilT6BOjJVemyg71GNv800rKe5yBYULzIbzTy2LHUVvZ7H7IxwdqYKr14YRcDpu\n1K7E9bG6cL0g92Vj2YOJ42cBU0K3rDd8QMAH4wABAoGBAIWecII4hRL9TY35DyTj\nzzBrsLmDNWDz7YWMtBBQQUT3bJvuC+77ZWzwx9sG/ot13QxMgeS95RGgUCoWu3Ip\nkovTMxtJjc9GfIm46eOk1wT6AnSTqXF2vfydtaYKyeSaSCncj1hJgEl/MmWaMC4v\ncZlvhYLq96N9eH1/O3KdDfTU\n-----END PRIVATE KEY-----\n",
+  "client_email": "pagae-service-account@pagae-backend.iam.gserviceaccount.com",
+  "client_id": "109500165829435617751",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pagae-service-account%40pagae-backend.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
