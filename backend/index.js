@@ -22,6 +22,14 @@ if (!SHEET_ID) {
 }
 
 // ======================================================
+// 📌 HEALTH CHECK
+// ======================================================
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", message: "Backend rodando 🚀" });
+});
+
+// ======================================================
 // 📌 CRUD CONTAS
 // ======================================================
 
@@ -29,7 +37,7 @@ app.get("/api/dados", async (req, res) => {
   try {
     const dados = await getAll(SHEET_ID);
     res.json(dados);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Erro ao buscar dados" });
   }
 });
@@ -38,7 +46,7 @@ app.post("/api/dados", async (req, res) => {
   try {
     await add(SHEET_ID, req.body);
     res.json({ ok: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Erro ao adicionar" });
   }
 });
@@ -48,7 +56,7 @@ app.put("/api/dados/:row", async (req, res) => {
     const row = Number(req.params.row);
     await update(SHEET_ID, row, req.body);
     res.json({ ok: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Erro ao atualizar" });
   }
 });
@@ -58,19 +66,18 @@ app.delete("/api/dados/:row", async (req, res) => {
     const row = Number(req.params.row);
     await remove(SHEET_ID, row);
     res.json({ ok: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Erro ao excluir" });
   }
 });
 
 // ======================================================
-// 📌 FECHAR MÊS (GERA PDF + RESETA CONTAS)
+// 📌 FECHAR MÊS
 // ======================================================
 
 app.post("/api/fechar-mes", async (req, res) => {
   try {
     const { mes, ano } = req.body;
-
     if (!mes || !ano) {
       return res.status(400).json({ error: "Mês e ano obrigatórios" });
     }
@@ -94,11 +101,14 @@ app.post("/api/fechar-mes", async (req, res) => {
 // 📌 HISTÓRICO
 // ======================================================
 
-const PDF_BASE = path.join(process.cwd(), "backend", "pdfs");
+// ⚠️ caminho compatível com Render
+const PDF_BASE = path.join(process.cwd(), "pdfs");
+
+if (!fs.existsSync(PDF_BASE)) {
+  fs.mkdirSync(PDF_BASE, { recursive: true });
+}
 
 app.get("/api/historico/anos", (req, res) => {
-  if (!fs.existsSync(PDF_BASE)) return res.json([]);
-
   const anos = fs
     .readdirSync(PDF_BASE)
     .filter(a => fs.statSync(path.join(PDF_BASE, a)).isDirectory());
@@ -108,23 +118,17 @@ app.get("/api/historico/anos", (req, res) => {
 
 app.get("/api/historico/:ano", (req, res) => {
   const pasta = path.join(PDF_BASE, req.params.ano);
-
   if (!fs.existsSync(pasta)) return res.json([]);
 
-  const arquivos = fs
-    .readdirSync(pasta)
-    .filter(a => a.endsWith(".pdf"));
-
+  const arquivos = fs.readdirSync(pasta).filter(a => a.endsWith(".pdf"));
   res.json(arquivos);
 });
 
 app.get("/api/historico/:ano/:arquivo", (req, res) => {
   const caminho = path.join(PDF_BASE, req.params.ano, req.params.arquivo);
-
   if (!fs.existsSync(caminho)) {
     return res.status(404).send("Arquivo não encontrado");
   }
-
   res.download(caminho);
 });
 
