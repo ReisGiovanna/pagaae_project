@@ -23,6 +23,15 @@
 </head>
 
 <body id="container">
+  <!-- LOADING GLOBAL -->
+  <div id="loader" class="loader hidden">
+    <div class="spinner"></div>
+    <span>Processando...</span>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
   <header>
     <h1>PagaAê</h1>
   </header>
@@ -61,7 +70,25 @@
 
   <footer>© 2025 — PagaAê</footer>
 
-  <!-- Modal -->
+  <!-- MODAL HISTÓRICO -->
+  <div id="modalHistorico" class="modal hidden">
+    <div class="modal-content">
+      <h2>Histórico</h2>
+
+      <label>Ano:</label>
+      <select id="selectAno">
+        <option value="">Selecione</option>
+      </select>
+
+      <ul id="listaPdfs" class="lista-pdfs"></ul>
+
+      <div class="modal-buttons">
+        <button id="fecharHistorico" class="btnCancel">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONTA -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modalTitulo">Conta</h2>

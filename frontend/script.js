@@ -1,7 +1,7 @@
 // ===============================
 // CONFIG API
 // ===============================
-const API_BASE = "https://pagaae-backend.onrender.com";
+const API_BASE = "https://pagae-backend.onrender.com";
 
 const API_DADOS = `${API_BASE}/api/dados`;
 const API_FECHAR_MES = `${API_BASE}/api/fechar-mes`;
@@ -9,9 +9,11 @@ const API_HISTORICO_ANOS = `${API_BASE}/api/historico/anos`;
 const API_HISTORICO_PDFS = (ano) =>
   `${API_BASE}/api/historico/${ano}`;
 
+// ===============================
+// ESTADO
+// ===============================
 let contas = [];
 let contaSelecionada = null;
-
 
 // ===============================
 // ELEMENTOS
@@ -37,13 +39,55 @@ const inputCategoria = document.getElementById("inputCategoria");
 const btnSalvar = document.getElementById("salvarConta");
 const btnCancelar = document.getElementById("cancelarModal");
 
+// MODAL HISTÓRICO
+const modalHistorico = document.getElementById("modalHistorico");
+const fecharHistorico = document.getElementById("fecharHistorico");
+const selectAno = document.getElementById("selectAno");
+const listaPdfs = document.getElementById("listaPdfs");
+
+// ===============================
+// LOADER + TOAST
+// ===============================
+const loader = document.createElement("div");
+loader.className = "loader hidden";
+loader.innerHTML = `
+  <div class="spinner"></div>
+  <span>Carregando...</span>
+`;
+document.body.appendChild(loader);
+
+const toast = document.createElement("div");
+toast.className = "toast";
+document.body.appendChild(toast);
+
+function showLoader() {
+  loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+  loader.classList.add("hidden");
+}
+
+function showToast(msg, type = "success") {
+  toast.innerText = msg;
+  toast.className = `toast show ${type}`;
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
 // ===============================
 // CARREGAR DADOS
 // ===============================
 async function carregarDados() {
-  const res = await fetch(API_DADOS);
-  contas = await res.json();
-  renderTabela();
+  try {
+    showLoader();
+    const res = await fetch(API_DADOS);
+    contas = await res.json();
+    renderTabela();
+  } catch {
+    showToast("Erro ao carregar dados", "error");
+  } finally {
+    hideLoader();
+  }
 }
 
 // ===============================
@@ -91,7 +135,7 @@ function selecionarConta(conta, linha) {
 }
 
 // ===============================
-// MODAL
+// MODAL ADD / EDIT
 // ===============================
 btnAdicionar.onclick = () => {
   contaSelecionada = null;
@@ -125,30 +169,39 @@ btnCancelar.onclick = () => modal.classList.add("hidden");
 // SALVAR
 // ===============================
 btnSalvar.onclick = async () => {
-  const dados = {
-    Nome: inputNome.value,
-    Vencimento: inputVenc.value,
-    Valor: inputValor.value,
-    Status: inputStatus.value,
-    Categoria: inputCategoria.value
-  };
+  try {
+    showLoader();
+    const dados = {
+      Nome: inputNome.value,
+      Vencimento: inputVenc.value,
+      Valor: inputValor.value,
+      Status: inputStatus.value,
+      Categoria: inputCategoria.value
+    };
 
-  if (!contaSelecionada) {
-    await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dados)
-    });
-  } else {
-    await fetch(`${API_URL}/${contaSelecionada._row}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...dados, ID: contaSelecionada.ID })
-    });
+    if (!contaSelecionada) {
+      await fetch(API_DADOS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      });
+      showToast("Conta adicionada!");
+    } else {
+      await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...dados, ID: contaSelecionada.ID })
+      });
+      showToast("Conta atualizada!");
+    }
+
+    modal.classList.add("hidden");
+    carregarDados();
+  } catch {
+    showToast("Erro ao salvar conta", "error");
+  } finally {
+    hideLoader();
   }
-
-  modal.classList.add("hidden");
-  carregarDados();
 };
 
 // ===============================
@@ -157,23 +210,38 @@ btnSalvar.onclick = async () => {
 btnPagar.onclick = async () => {
   if (!contaSelecionada) return;
 
-  await fetch(`${API_URL}/${contaSelecionada._row}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...contaSelecionada, Status: "pago" })
-  });
-
-  carregarDados();
+  try {
+    showLoader();
+    await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...contaSelecionada, Status: "pago" })
+    });
+    showToast("Conta marcada como paga!");
+    carregarDados();
+  } catch {
+    showToast("Erro ao pagar conta", "error");
+  } finally {
+    hideLoader();
+  }
 };
 
 btnExcluir.onclick = async () => {
   if (!contaSelecionada) return;
+  if (!confirm("Deseja excluir esta conta?")) return;
 
-  await fetch(`${API_URL}/${contaSelecionada._row}`, {
-    method: "DELETE"
-  });
-
-  carregarDados();
+  try {
+    showLoader();
+    await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
+      method: "DELETE"
+    });
+    showToast("Conta excluída!");
+    carregarDados();
+  } catch {
+    showToast("Erro ao excluir", "error");
+  } finally {
+    hideLoader();
+  }
 };
 
 // ===============================
@@ -191,42 +259,99 @@ btnFecharMes.onclick = async () => {
 
   if (!confirm(`Fechar mês ${mes}/${ano}?`)) return;
 
-  const res = await fetch(API_FECHAR_MES, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mes, ano })
-  });
+  try {
+    showLoader();
+    const res = await fetch(API_FECHAR_MES, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mes, ano })
+    });
 
-  if (!res.ok) {
-    alert("Erro ao fechar mês");
-    return;
+    if (!res.ok) throw new Error();
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `PagaAe_${mes}_${ano}.pdf`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+
+    showToast("Mês fechado com sucesso!");
+    carregarDados();
+  } catch {
+    showToast("Erro ao fechar mês", "error");
+  } finally {
+    hideLoader();
   }
-
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `PagaAe_${mes}_${ano}.pdf`;
-  a.click();
-
-  window.URL.revokeObjectURL(url);
-
-  carregarDados();
 };
-
 
 // ===============================
 // HISTÓRICO
 // ===============================
 btnHistorico.onclick = async () => {
-  const res = await fetch(API_HISTORICO);
-  const dados = await res.json();
+  modalHistorico.classList.remove("hidden");
+  listaPdfs.innerHTML = "";
+  selectAno.innerHTML = `<option value="">Selecione</option>`;
 
-  let msg = "PDFs disponíveis:\n\n";
-  dados.forEach(p => msg += `${p.ano} → ${p.arquivo}\n`);
+  try {
+    showLoader();
+    const res = await fetch(API_HISTORICO_ANOS);
+    const anos = await res.json();
 
-  alert(msg);
+    if (!anos.length) {
+      listaPdfs.innerHTML = "<li>Nenhum histórico disponível</li>";
+    }
+
+    anos.forEach(ano => {
+      const opt = document.createElement("option");
+      opt.value = ano;
+      opt.innerText = ano;
+      selectAno.appendChild(opt);
+    });
+  } catch {
+    showToast("Erro ao carregar histórico", "error");
+  } finally {
+    hideLoader();
+  }
+};
+
+selectAno.onchange = async () => {
+  const ano = selectAno.value;
+  listaPdfs.innerHTML = "";
+
+  if (!ano) return;
+
+  try {
+    showLoader();
+    const res = await fetch(API_HISTORICO_PDFS(ano));
+    const pdfs = await res.json();
+
+    if (!pdfs.length) {
+      listaPdfs.innerHTML = "<li>Nenhum PDF neste ano</li>";
+    }
+
+    pdfs.forEach(nome => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${nome}</span>
+        <button onclick="window.open('${API_BASE}/api/historico/${ano}/${nome}')">
+          Baixar
+        </button>
+      `;
+      listaPdfs.appendChild(li);
+    });
+  } catch {
+    showToast("Erro ao carregar PDFs", "error");
+  } finally {
+    hideLoader();
+  }
+};
+
+fecharHistorico.onclick = () => {
+  modalHistorico.classList.add("hidden");
 };
 
 // ===============================
