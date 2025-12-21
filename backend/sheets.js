@@ -1,6 +1,9 @@
-// backend/sheets.js
 import { google } from "googleapis";
 
+/**
+ * Credenciais via variável de ambiente (Render)
+ * GOOGLE_CREDENTIALS = JSON do service account
+ */
 const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 
 const auth = new google.auth.GoogleAuth({
@@ -14,7 +17,24 @@ async function getSheetsClient() {
 }
 
 /**
- * Lê todas as contas da aba principal
+ * Utilitário: normaliza status
+ */
+function normalizarStatus(status) {
+  if (!status) return "pendente";
+  return status.toString().toLowerCase();
+}
+
+/**
+ * Utilitário: mantém data no formato original
+ */
+function normalizarData(data) {
+  return data || "";
+}
+
+/**
+ * ===============================
+ * LER TODAS AS CONTAS
+ * ===============================
  */
 export async function getAll(spreadsheetId) {
   const sheets = await getSheetsClient();
@@ -25,21 +45,36 @@ export async function getAll(spreadsheetId) {
   });
 
   const values = res.data.values || [];
-  if (!values.length) return [];
+  if (values.length <= 1) return [];
 
   const headers = values[0];
-  return values.slice(1).map((row, i) => {
+
+  return values.slice(1).map((row, index) => {
     const obj = {};
-    headers.forEach((h, idx) => {
-      obj[h] = row[idx] || "";
+
+    headers.forEach((header, i) => {
+      let value = row[i] || "";
+
+      if (header === "Status") {
+        value = normalizarStatus(value);
+      }
+
+      if (header === "Vencimento") {
+        value = normalizarData(value);
+      }
+
+      obj[header] = value;
     });
-    obj._row = i + 2; // linha real na planilha
+
+    obj._row = index + 2; // linha real na planilha
     return obj;
   });
 }
 
 /**
- * Adiciona nova conta
+ * ===============================
+ * ADICIONAR CONTA
+ * ===============================
  */
 export async function add(spreadsheetId, data) {
   const sheets = await getSheetsClient();
@@ -49,7 +84,7 @@ export async function add(spreadsheetId, data) {
     data.Nome || "",
     data.Vencimento || "",
     data.Valor || "",
-    data.Status || "pendente",
+    normalizarStatus(data.Status),
     data.Categoria || "",
     data.Observacoes || "",
   ];
@@ -65,7 +100,9 @@ export async function add(spreadsheetId, data) {
 }
 
 /**
- * Atualiza conta
+ * ===============================
+ * ATUALIZAR CONTA
+ * ===============================
  */
 export async function update(spreadsheetId, row, data) {
   const sheets = await getSheetsClient();
@@ -80,7 +117,7 @@ export async function update(spreadsheetId, row, data) {
         data.Nome || "",
         data.Vencimento || "",
         data.Valor || "",
-        data.Status || "",
+        normalizarStatus(data.Status),
         data.Categoria || "",
         data.Observacoes || "",
       ]],
@@ -91,7 +128,9 @@ export async function update(spreadsheetId, row, data) {
 }
 
 /**
- * Remove conta
+ * ===============================
+ * REMOVER CONTA
+ * ===============================
  */
 export async function remove(spreadsheetId, row) {
   const sheets = await getSheetsClient();
@@ -119,16 +158,24 @@ export async function remove(spreadsheetId, row) {
 }
 
 /**
- * Fecha o mês:
- * - Gera PDF
- * - Reseta status/valor e avança vencimento
+ * ===============================
+ * FECHAR MÊS
+ * - Avança vencimento
+ * - Reseta status e valor
+ * ===============================
  */
 export async function resetarMes(spreadsheetId, contas) {
   const sheets = await getSheetsClient();
 
   for (const c of contas) {
-    const data = new Date(c.Vencimento || new Date());
-    data.setMonth(data.getMonth() + 1);
+    let novaData = "";
+
+    if (c.Vencimento && c.Vencimento.includes("/")) {
+      const [dia, mes, ano] = c.Vencimento.split("/");
+      const data = new Date(`20${ano}-${mes}-${dia}`);
+      data.setMonth(data.getMonth() + 1);
+      novaData = data.toISOString().split("T")[0];
+    }
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
@@ -136,15 +183,17 @@ export async function resetarMes(spreadsheetId, contas) {
       valueInputOption: "RAW",
       requestBody: {
         values: [[
-          c.ID,
-          c.Nome,
-          data.toISOString().split("T")[0],
+          c.ID || "",
+          c.Nome || "",
+          novaData,
           "",
           "pendente",
-          c.Categoria,
+          c.Categoria || "",
           c.Observacoes || "",
         ]],
       },
     });
   }
+
+  return { ok: true };
 }
