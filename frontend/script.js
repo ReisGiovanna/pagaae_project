@@ -1,7 +1,7 @@
 // ===============================
 // CONFIG API
 // ===============================
-const API_BASE = "https://pagae-backend.onrender.com";
+const API_BASE = "https://pagaae-backend.onrender.com";
 
 const API_DADOS = `${API_BASE}/api/dados`;
 const API_FECHAR_MES = `${API_BASE}/api/fechar-mes`;
