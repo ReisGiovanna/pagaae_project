@@ -79,14 +79,18 @@ function showToast(msg, type = "success") {
 // ===============================
 async function carregarDados() {
   try {
-    showLoader();
-    const res = await fetch(API_DADOS);
+    const res = await fetch(`${API_BASE}/api/dados`);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
     contas = await res.json();
     renderTabela();
-  } catch {
-    showToast("Erro ao carregar dados", "error");
-  } finally {
-    hideLoader();
+
+  } catch (err) {
+    console.error("Erro ao carregar dados:", err);
+    alert("Erro ao carregar dados do servidor");
   }
 }
 
