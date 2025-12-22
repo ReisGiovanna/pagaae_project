@@ -10,7 +10,7 @@ import { gerarPDF } from "./pdf.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -22,41 +22,60 @@ if (!SHEET_ID) {
 }
 
 // ======================================================
+// 📌 ROTA RAIZ (DEBUG / RENDER)
+// ======================================================
+
+app.get("/", (req, res) => {
+  res.send("API PagaAê rodando");
+});
+
+// ======================================================
 // 📌 HEALTH CHECK
 // ======================================================
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Backend rodando 🚀" });
+  res.json({ status: "ok", message: "Backend rodando" });
 });
 
 // ======================================================
 // 📌 CRUD CONTAS
 // ======================================================
 
+// ROTA PRINCIPAL
 app.get("/api/dados", async (req, res) => {
   try {
     const dados = await getAll(SHEET_ID);
     res.json(dados);
-  } catch {
+  } catch (err) {
+    console.error("GET /api/dados:", err);
     res.status(500).json({ error: "Erro ao buscar dados" });
   }
 });
+
+// ALIASES (para compatibilidade com o frontend atual)
+app.get("/dados", (req, res) => res.redirect("/api/dados"));
+app.get("/contas", (req, res) => res.redirect("/api/dados"));
 
 app.post("/api/dados", async (req, res) => {
   try {
     await add(SHEET_ID, req.body);
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/dados:", err);
     res.status(500).json({ error: "Erro ao adicionar" });
   }
 });
+
+app.post("/dados", (req, res) => res.redirect(307, "/api/dados"));
+app.post("/contas", (req, res) => res.redirect(307, "/api/dados"));
 
 app.put("/api/dados/:row", async (req, res) => {
   try {
     const row = Number(req.params.row);
     await update(SHEET_ID, row, req.body);
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error("PUT /api/dados:", err);
     res.status(500).json({ error: "Erro ao atualizar" });
   }
 });
@@ -66,7 +85,8 @@ app.delete("/api/dados/:row", async (req, res) => {
     const row = Number(req.params.row);
     await remove(SHEET_ID, row);
     res.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error("DELETE /api/dados:", err);
     res.status(500).json({ error: "Erro ao excluir" });
   }
 });
@@ -78,6 +98,7 @@ app.delete("/api/dados/:row", async (req, res) => {
 app.post("/api/fechar-mes", async (req, res) => {
   try {
     const { mes, ano } = req.body;
+
     if (!mes || !ano) {
       return res.status(400).json({ error: "Mês e ano obrigatórios" });
     }
@@ -92,7 +113,7 @@ app.post("/api/fechar-mes", async (req, res) => {
 
     res.download(pdf.caminho, pdf.nomeArquivo);
   } catch (err) {
-    console.error(err);
+    console.error("POST /api/fechar-mes:", err);
     res.status(500).json({ error: "Erro ao fechar mês" });
   }
 });
@@ -101,7 +122,6 @@ app.post("/api/fechar-mes", async (req, res) => {
 // 📌 HISTÓRICO
 // ======================================================
 
-// ⚠️ caminho compatível com Render
 const PDF_BASE = path.join(process.cwd(), "pdfs");
 
 if (!fs.existsSync(PDF_BASE)) {
