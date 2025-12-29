@@ -47,8 +47,8 @@ app.get("/api/dados", async (req, res) => {
     const dados = await getAll(SHEET_ID);
     res.json(dados);
   } catch (err) {
-    console.error("GET /api/dados:", err);
-    res.status(500).json({ error: "Erro ao buscar dados" });
+    console.error("ERRO AO BUSCAR DADOS:", err);
+    res.status(500).json({ error: "Erro ao buscar dados", detalhe: err.message});
   }
 });
 
@@ -62,7 +62,7 @@ app.post("/api/dados", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("POST /api/dados:", err);
-    res.status(500).json({ error: "Erro ao adicionar" });
+    res.status(500).json({ error: "Erro ao adicionar", detalhe: err.message});
   }
 });
 
@@ -76,7 +76,7 @@ app.put("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("PUT /api/dados:", err);
-    res.status(500).json({ error: "Erro ao atualizar" });
+    res.status(500).json({ error: "Erro ao utilizar", detalhe: err.message});
   }
 });
 
@@ -87,7 +87,7 @@ app.delete("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/dados:", err);
-    res.status(500).json({ error: "Erro ao excluir" });
+    res.status(500).json({ error: "Erro ao excluir", detalhe: err.message});
   }
 });
 
@@ -114,7 +114,7 @@ app.post("/api/fechar-mes", async (req, res) => {
     res.download(pdf.caminho, pdf.nomeArquivo);
   } catch (err) {
     console.error("POST /api/fechar-mes:", err);
-    res.status(500).json({ error: "Erro ao fechar mês" });
+    res.status(500).json({ error: "Erro ao fechar mês", detalhe: err.message});
   }
 });
 
