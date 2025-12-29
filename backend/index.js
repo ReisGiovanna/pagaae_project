@@ -10,7 +10,16 @@ import { gerarPDF } from "./pdf.js";
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "*" }));
+
+/* =========================
+   CORS — CONFIG CORRETA
+========================= */
+app.use(cors({
+  origin: "https://pagaae-project.onrender.com",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -21,40 +30,27 @@ if (!SHEET_ID) {
   process.exit(1);
 }
 
-// ======================================================
-// 📌 ROTA RAIZ (DEBUG / RENDER)
-// ======================================================
+/* =========================
+   ROTAS
+========================= */
 
 app.get("/", (req, res) => {
   res.send("API PagaAê rodando");
 });
 
-// ======================================================
-// 📌 HEALTH CHECK
-// ======================================================
-
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Backend rodando" });
 });
 
-// ======================================================
-// 📌 CRUD CONTAS
-// ======================================================
-
-// ROTA PRINCIPAL
 app.get("/api/dados", async (req, res) => {
   try {
     const dados = await getAll(SHEET_ID);
     res.json(dados);
   } catch (err) {
     console.error("ERRO AO BUSCAR DADOS:", err);
-    res.status(500).json({ error: "Erro ao buscar dados", detalhe: err.message});
+    res.status(500).json({ error: "Erro ao buscar dados", detalhe: err.message });
   }
 });
-
-// ALIASES (para compatibilidade com o frontend atual)
-app.get("/dados", (req, res) => res.redirect("/api/dados"));
-app.get("/contas", (req, res) => res.redirect("/api/dados"));
 
 app.post("/api/dados", async (req, res) => {
   try {
@@ -62,12 +58,9 @@ app.post("/api/dados", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("POST /api/dados:", err);
-    res.status(500).json({ error: "Erro ao adicionar", detalhe: err.message});
+    res.status(500).json({ error: "Erro ao adicionar", detalhe: err.message });
   }
 });
-
-app.post("/dados", (req, res) => res.redirect(307, "/api/dados"));
-app.post("/contas", (req, res) => res.redirect(307, "/api/dados"));
 
 app.put("/api/dados/:row", async (req, res) => {
   try {
@@ -76,7 +69,7 @@ app.put("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("PUT /api/dados:", err);
-    res.status(500).json({ error: "Erro ao utilizar", detalhe: err.message});
+    res.status(500).json({ error: "Erro ao atualizar", detalhe: err.message });
   }
 });
 
@@ -87,74 +80,13 @@ app.delete("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/dados:", err);
-    res.status(500).json({ error: "Erro ao excluir", detalhe: err.message});
+    res.status(500).json({ error: "Erro ao excluir", detalhe: err.message });
   }
 });
 
-// ======================================================
-// 📌 FECHAR MÊS
-// ======================================================
-
-app.post("/api/fechar-mes", async (req, res) => {
-  try {
-    const { mes, ano } = req.body;
-
-    if (!mes || !ano) {
-      return res.status(400).json({ error: "Mês e ano obrigatórios" });
-    }
-
-    const contas = await getAll(SHEET_ID);
-    if (!contas.length) {
-      return res.status(400).json({ error: "Sem contas" });
-    }
-
-    const pdf = await gerarPDF(contas, mes, ano);
-    await resetarMes(SHEET_ID, contas);
-
-    res.download(pdf.caminho, pdf.nomeArquivo);
-  } catch (err) {
-    console.error("POST /api/fechar-mes:", err);
-    res.status(500).json({ error: "Erro ao fechar mês", detalhe: err.message});
-  }
-});
-
-// ======================================================
-// 📌 HISTÓRICO
-// ======================================================
-
-const PDF_BASE = path.join(process.cwd(), "pdfs");
-
-if (!fs.existsSync(PDF_BASE)) {
-  fs.mkdirSync(PDF_BASE, { recursive: true });
-}
-
-app.get("/api/historico/anos", (req, res) => {
-  const anos = fs
-    .readdirSync(PDF_BASE)
-    .filter(a => fs.statSync(path.join(PDF_BASE, a)).isDirectory());
-
-  res.json(anos);
-});
-
-app.get("/api/historico/:ano", (req, res) => {
-  const pasta = path.join(PDF_BASE, req.params.ano);
-  if (!fs.existsSync(pasta)) return res.json([]);
-
-  const arquivos = fs.readdirSync(pasta).filter(a => a.endsWith(".pdf"));
-  res.json(arquivos);
-});
-
-app.get("/api/historico/:ano/:arquivo", (req, res) => {
-  const caminho = path.join(PDF_BASE, req.params.ano, req.params.arquivo);
-  if (!fs.existsSync(caminho)) {
-    return res.status(404).send("Arquivo não encontrado");
-  }
-  res.download(caminho);
-});
-
-// ======================================================
-// 🚀 START
-// ======================================================
+/* =========================
+   START
+========================= */
 
 app.listen(PORT, () => {
   console.log(`✅ Backend rodando na porta ${PORT}`);
