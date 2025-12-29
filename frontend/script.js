@@ -75,11 +75,16 @@ function showToast(msg, type = "success") {
 }
 
 // ===============================
-// CARREGAR DADOS
+// CARREGAR DADOS (CORRIGIDO)
 // ===============================
 async function carregarDados() {
   try {
-    const res = await fetch(`${API_BASE}/api/dados`);
+    showLoader();
+
+    const res = await fetch(API_DADOS, {
+      method: "GET",
+      mode: "cors"
+    });
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
@@ -87,10 +92,11 @@ async function carregarDados() {
 
     contas = await res.json();
     renderTabela();
-
   } catch (err) {
     console.error("Erro ao carregar dados:", err);
     alert("Erro ao carregar dados do servidor");
+  } finally {
+    hideLoader();
   }
 }
 
@@ -170,11 +176,12 @@ btnEditar.onclick = () => {
 btnCancelar.onclick = () => modal.classList.add("hidden");
 
 // ===============================
-// SALVAR
+// SALVAR (CORRIGIDO)
 // ===============================
 btnSalvar.onclick = async () => {
   try {
     showLoader();
+
     const dados = {
       Nome: inputNome.value,
       Vencimento: inputVenc.value,
@@ -186,6 +193,7 @@ btnSalvar.onclick = async () => {
     if (!contaSelecionada) {
       await fetch(API_DADOS, {
         method: "POST",
+        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados)
       });
@@ -193,6 +201,7 @@ btnSalvar.onclick = async () => {
     } else {
       await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
         method: "PUT",
+        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...dados, ID: contaSelecionada.ID })
       });
@@ -218,6 +227,7 @@ btnPagar.onclick = async () => {
     showLoader();
     await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
       method: "PUT",
+      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...contaSelecionada, Status: "pago" })
     });
@@ -237,7 +247,8 @@ btnExcluir.onclick = async () => {
   try {
     showLoader();
     await fetch(`${API_DADOS}/${contaSelecionada._row}`, {
-      method: "DELETE"
+      method: "DELETE",
+      mode: "cors"
     });
     showToast("Conta excluída!");
     carregarDados();
@@ -249,7 +260,7 @@ btnExcluir.onclick = async () => {
 };
 
 // ===============================
-// FECHAR MÊS (PDF)
+// FECHAR MÊS
 // ===============================
 btnFecharMes.onclick = async () => {
   const hoje = new Date();
@@ -267,6 +278,7 @@ btnFecharMes.onclick = async () => {
     showLoader();
     const res = await fetch(API_FECHAR_MES, {
       method: "POST",
+      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mes, ano })
     });
@@ -302,7 +314,7 @@ btnHistorico.onclick = async () => {
 
   try {
     showLoader();
-    const res = await fetch(API_HISTORICO_ANOS);
+    const res = await fetch(API_HISTORICO_ANOS, { mode: "cors" });
     const anos = await res.json();
 
     if (!anos.length) {
@@ -325,12 +337,11 @@ btnHistorico.onclick = async () => {
 selectAno.onchange = async () => {
   const ano = selectAno.value;
   listaPdfs.innerHTML = "";
-
   if (!ano) return;
 
   try {
     showLoader();
-    const res = await fetch(API_HISTORICO_PDFS(ano));
+    const res = await fetch(API_HISTORICO_PDFS(ano), { mode: "cors" });
     const pdfs = await res.json();
 
     if (!pdfs.length) {
@@ -362,7 +373,3 @@ fecharHistorico.onclick = () => {
 // INIT
 // ===============================
 carregarDados();
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/frontend/sw.js");
-}
