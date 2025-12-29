@@ -1,8 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
 
 import { getAll, add, update, remove, resetarMes } from "./sheets.js";
 import { gerarPDF } from "./pdf.js";
@@ -13,13 +11,23 @@ const app = express();
 
 /* =========================
    CORS — CONFIG CORRETA
+   (Render + Front separado)
 ========================= */
-app.use(cors({
-  origin: "https://pagaae-project.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type"]
-}));
+const corsOptions = {
+  origin: [
+    "https://pagaae-project.onrender.com"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  credentials: false
+};
 
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // <-- PRE-FLIGHT (ESSENCIAL)
+
+/* =========================
+   MIDDLEWARES
+========================= */
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -48,7 +56,10 @@ app.get("/api/dados", async (req, res) => {
     res.json(dados);
   } catch (err) {
     console.error("ERRO AO BUSCAR DADOS:", err);
-    res.status(500).json({ error: "Erro ao buscar dados", detalhe: err.message });
+    res.status(500).json({
+      error: "Erro ao buscar dados",
+      detalhe: err.message
+    });
   }
 });
 
@@ -58,7 +69,10 @@ app.post("/api/dados", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("POST /api/dados:", err);
-    res.status(500).json({ error: "Erro ao adicionar", detalhe: err.message });
+    res.status(500).json({
+      error: "Erro ao adicionar",
+      detalhe: err.message
+    });
   }
 });
 
@@ -69,7 +83,10 @@ app.put("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("PUT /api/dados:", err);
-    res.status(500).json({ error: "Erro ao atualizar", detalhe: err.message });
+    res.status(500).json({
+      error: "Erro ao atualizar",
+      detalhe: err.message
+    });
   }
 });
 
@@ -80,7 +97,10 @@ app.delete("/api/dados/:row", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/dados:", err);
-    res.status(500).json({ error: "Erro ao excluir", detalhe: err.message });
+    res.status(500).json({
+      error: "Erro ao excluir",
+      detalhe: err.message
+    });
   }
 });
 
